@@ -1,0 +1,113 @@
+# Before script will make a AWS call on our behalf to STS to retrieve temporary credentials: https://docs.aws.amazon.com/cli/latest/topic/config-vars.html#assume-role-with-web-identity 
+# The variables "ROLE_ARN" and "AWS_PROFILE" are defined in the project settings.
+# MY_OIDC_TOKEN is defined within the job and is then referenced
+# This sample only allows access to S3 and fails for EC2
+
+variables:
+  TF_ROOT: ${CI_PROJECT_DIR}/terraform/dev
+  AWS_ROLE_ARN: ${SANDBOX_ROLE}
+  AWS_WEB_IDENTITY_TOKEN_FILE: /tmp/web_identity_token
+  AWS_DEFAULT_REGION: us-east-1
+  #TF_LOG: debug # If you need debug the pipeline uncomment this
+  GITLAB_TERRAFORM_IMG: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
+  HARSHICORP_IMG: hashicorp/terraform:1.4.0
+  ALLOW_DESTROY: ""  #When manually run the destroy need to set the value as --auto-approve
+
+cache:
+  key: opstools_deploy
+  paths:
+    - ${TF_ROOT}/.terraform
+
+
+before_script:
+  - mkdir -p ~/.aws
+  - echo "${CI_JOB_JWT_V2}" > /tmp/web_identity_token # Set the webidentity token from gitlab
+  - echo -e "[profile oidc]\nrole_arn=$AWS_ROLE_ARN\nweb_identity_token_file=/tmp/web_identity_token" > ~/.aws/config
+  - aws sts assume-role-with-web-identity --role-arn "$AWS_ROLE_ARN" --role-session-name gitlab-pipeline-${CI_PIPELINE_IID} --web-identity-token "$(cat $AWS_WEB_IDENTITY_TOKEN_FILE)" --duration-seconds 3600 > sts.json
+  - export AWS_ACCESS_KEY_ID=$(jq -r '.Credentials.AccessKeyId' sts.json)
+  - export AWS_SECRET_ACCESS_KEY=$(jq -r '.Credentials.SecretAccessKey' sts.json)
+  - export AWS_SESSION_TOKEN=$(jq -r '.Credentials.SessionToken' sts.json)
+  - cd ${TF_ROOT}
+
+stages:
+  - prepare
+  - initiate
+  - planing
+  - deploy
+  - destroy
+
+pipeline image build:
+  stage: prepare
+  before_script: []
+  image: docker
+  services:
+    - docker:dind
+  script:
+    - cd $CI_PROJECT_DIR
+    - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $CI_REGISTRY --password-stdin
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - Dockerfile
+
+init:
+  stage: initiate
+  image: $CI_REGISTRY_IMAGE
+  script:
+    - terraform init
+  only:
+    - dev
+
+validate:
+  stage: initiate
+  image: $CI_REGISTRY_IMAGE
+  script:
+    - terraform init
+    - terraform validate
+  only:
+    - dev
+
+plan:
+  stage: planing
+  image: $CI_REGISTRY_IMAGE
+  script:
+    - terraform init
+    - terraform plan -var-file=terraform.tfvars -out=tfplan
+  artifacts:
+    untracked: false
+    when: on_success
+    expire_in: "10 days"
+    name: plan
+    paths:
+      - ${TF_ROOT}/tfplan
+    reports:
+      terraform: ${TF_ROOT}/tfplan
+  only:
+    - dev
+
+apply:
+  stage: deploy
+  image: $CI_REGISTRY_IMAGE
+  script:
+    - terraform init
+    - terraform apply tfplan
+  dependencies:
+    - plan
+  when: manual
+  only:
+    - dev
+
+destroy:
+  stage: destroy
+  image: $CI_REGISTRY_IMAGE
+  script:
+    - terraform init
+    - terraform destroy -var-file=terraform.tfvars $ALLOW_DESTROY
+  dependencies:
+    - plan
+    - apply
+  when: manual
+  only:
+    - dev
