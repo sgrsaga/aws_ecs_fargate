@@ -712,6 +712,9 @@ resource "aws_ecs_service" "service_node_app" {
     container_name   = "AppTask"
     container_port   = 80
   }
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
 }
 
 # Autoscaling for ECS Service instances
