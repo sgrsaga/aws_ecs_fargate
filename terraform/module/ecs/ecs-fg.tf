@@ -524,7 +524,7 @@ resource "aws_lb_listener" "alb_to_tg1" {
 # Links ALB to TG with lister rule secondary
 resource "aws_lb_listener" "alb_to_tg2" {
   load_balancer_arn = aws_lb.ecs_lb.arn
-  port = 8080
+  port = 80
   protocol = "HTTP"
   default_action {
     target_group_arn = aws_lb_target_group.ecs_alb_tg2.id
