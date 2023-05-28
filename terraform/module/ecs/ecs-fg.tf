@@ -727,6 +727,94 @@ resource "aws_ecs_service" "service_node_app" {
   */
 }
 
+
+# ECS Service configuration - This block maintain the link between all services.
+resource "aws_ecs_service" "service_node_app" {
+  name            = "service_node_app"
+  cluster         = aws_ecs_cluster.project_cluster.id
+  task_definition = aws_ecs_task_definition.project_task.arn
+  desired_count   = 1
+  launch_type = "FARGATE"
+  #health_check_grace_period_seconds = 300
+  #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
+  network_configuration {
+    subnets = data.aws_subnets.private_subnets.ids
+  }
+  depends_on      = [
+    aws_ecs_cluster.project_cluster, 
+    aws_ecs_task_definition.project_task
+    #aws_lb_listener.alb_to_tg1,
+    #aws_lb_listener.alb_to_tg2,
+    #aws_lb_target_group.ecs_alb_tg1,
+    #aws_lb_target_group.ecs_alb_tg2
+    ]
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+  
+  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
+    container_name   = "AppTask"
+    container_port   = 80
+  }
+  /*
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
+    container_name   = "AppTask"
+    container_port   = 80
+  }
+  
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+  */
+}
+
+
+# ECS Service import a manual service
+resource "aws_ecs_service" "Manual_ALB" {
+  name            = "Manual_ALB"
+  cluster         = aws_ecs_cluster.project_cluster.id
+  task_definition = aws_ecs_task_definition.project_task.arn
+  desired_count   = 1
+  launch_type = "FARGATE"
+  #health_check_grace_period_seconds = 300
+  #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
+  network_configuration {
+    subnets = data.aws_subnets.private_subnets.ids
+  }
+  depends_on      = [
+    aws_ecs_cluster.project_cluster, 
+    aws_ecs_task_definition.project_task
+    #aws_lb_listener.alb_to_tg1,
+    #aws_lb_listener.alb_to_tg2,
+    #aws_lb_target_group.ecs_alb_tg1,
+    #aws_lb_target_group.ecs_alb_tg2
+    ]
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+  
+  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
+    container_name   = "AppTask"
+    container_port   = 80
+  }
+  /*
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
+    container_name   = "AppTask"
+    container_port   = 80
+  }
+  
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+  */
+}
+
 # Autoscaling for ECS Service instances
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = var.max_tasks
