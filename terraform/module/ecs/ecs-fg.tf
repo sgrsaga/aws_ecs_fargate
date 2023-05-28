@@ -727,7 +727,7 @@ resource "aws_ecs_service" "service_node_app" {
   */
 }
 
-
+/*
 # ECS Service configuration - This block maintain the link between all services.
 resource "aws_ecs_service" "service_node_app" {
   name            = "service_node_app"
@@ -769,8 +769,9 @@ resource "aws_ecs_service" "service_node_app" {
     type = "CODE_DEPLOY"
   }
   */
+  /*
 }
-
+*/
 
 # ECS Service import a manual service
 resource "aws_ecs_service" "Manual_ALB" {
