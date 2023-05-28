@@ -707,6 +707,8 @@ resource "aws_ecs_service" "service_node_app" {
   lifecycle {
     ignore_changes = [desired_count]
   }
+  /*
+  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
     container_name   = "AppTask"
@@ -717,6 +719,7 @@ resource "aws_ecs_service" "service_node_app" {
     container_name   = "AppTask"
     container_port   = 8080
   }
+  */
   deployment_controller {
     type = "CODE_DEPLOY"
   }
