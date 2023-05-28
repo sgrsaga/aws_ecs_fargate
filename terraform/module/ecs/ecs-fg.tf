@@ -691,6 +691,7 @@ resource "aws_autoscalingplans_scaling_plan" "ec2_scaling_plan" {
 }
 */
 
+/*
 # ECS Service configuration - This block maintain the link between all services.
 resource "aws_ecs_service" "service_node_app" {
   name            = "service_node_app"
@@ -732,8 +733,9 @@ resource "aws_ecs_service" "service_node_app" {
     type = "CODE_DEPLOY"
   }
   */
+  /*
 }
-
+*/
 /*
 # ECS Service configuration - This block maintain the link between all services.
 resource "aws_ecs_service" "service_node_app" {
@@ -798,11 +800,11 @@ resource "aws_ecs_service" "Manual_ALB" {
   }
   depends_on      = [
     aws_ecs_cluster.project_cluster, 
-    aws_ecs_task_definition.project_task
-    #aws_lb_listener.alb_to_tg1,
-    #aws_lb_listener.alb_to_tg2,
-    #aws_lb_target_group.ecs_alb_tg1,
-    #aws_lb_target_group.ecs_alb_tg2
+    aws_ecs_task_definition.project_task,
+    aws_lb_listener.alb_to_tg1,
+    aws_lb_listener.alb_to_tg2,
+    aws_lb_target_group.ecs_alb_tg1,
+    aws_lb_target_group.ecs_alb_tg2
     ]
   lifecycle {
     ignore_changes = [desired_count]
