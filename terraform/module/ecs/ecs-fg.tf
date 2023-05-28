@@ -691,7 +691,7 @@ resource "aws_ecs_service" "service_node_app" {
   task_definition = aws_ecs_task_definition.project_task.arn
   desired_count   = 1
   launch_type = "FARGATE"
-  health_check_grace_period_seconds = 300
+  #health_check_grace_period_seconds = 300
   #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
   network_configuration {
     subnets = data.aws_subnets.private_subnets.ids
