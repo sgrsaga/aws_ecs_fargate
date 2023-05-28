@@ -43,8 +43,8 @@ public_access_sg_ingress_rules = [
     },
     {
       protocol = "tcp"
-      from_port = 8443
-      to_port = 8443
+      from_port = 8080
+      to_port = 8080
       cidr_blocks = ["0.0.0.0/0"]
     }
   ]
