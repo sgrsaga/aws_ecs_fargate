@@ -717,7 +717,7 @@ resource "aws_ecs_service" "service_node_app" {
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
     container_name   = "AppTask"
-    container_port   = 8080
+    container_port   = 80
   }
   
   deployment_controller {
