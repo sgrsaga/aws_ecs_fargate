@@ -490,7 +490,7 @@ resource "aws_lb_target_group" "ecs_alb_tg1" {
 resource "aws_lb_target_group" "ecs_alb_tg2" {
   name     = "ecs-alb-tg2"
   target_type = "ip"
-  port     = 80
+  port     = 8080
   protocol = "HTTP"
   vpc_id   = var.vpc_id
   health_check {
@@ -524,7 +524,7 @@ resource "aws_lb_listener" "alb_to_tg1" {
 # Links ALB to TG with lister rule secondary
 resource "aws_lb_listener" "alb_to_tg2" {
   load_balancer_arn = aws_lb.ecs_lb.arn
-  port = 80
+  port = 8080
   protocol = "HTTP"
   default_action {
     target_group_arn = aws_lb_target_group.ecs_alb_tg2.id
@@ -707,7 +707,7 @@ resource "aws_ecs_service" "service_node_app" {
   lifecycle {
     ignore_changes = [desired_count]
   }
-  
+  /*
   ## Remove the loadbalancer from ECS service and assign from CodeDeploy
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
@@ -723,6 +723,7 @@ resource "aws_ecs_service" "service_node_app" {
   deployment_controller {
     type = "CODE_DEPLOY"
   }
+  */
 }
 
 # Autoscaling for ECS Service instances
