@@ -698,11 +698,11 @@ resource "aws_ecs_service" "service_node_app" {
   }
   depends_on      = [
     aws_ecs_cluster.project_cluster, 
-    aws_ecs_task_definition.project_task,
-    aws_lb_listener.alb_to_tg1,
-    aws_lb_listener.alb_to_tg2,
-    aws_lb_target_group.ecs_alb_tg1,
-    aws_lb_target_group.ecs_alb_tg2
+    aws_ecs_task_definition.project_task
+    #aws_lb_listener.alb_to_tg1,
+    #aws_lb_listener.alb_to_tg2,
+    #aws_lb_target_group.ecs_alb_tg1,
+    #aws_lb_target_group.ecs_alb_tg2
     ]
   lifecycle {
     ignore_changes = [desired_count]
