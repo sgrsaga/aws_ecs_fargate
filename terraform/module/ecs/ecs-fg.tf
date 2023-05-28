@@ -783,8 +783,8 @@ resource "aws_ecs_service" "service_node_app" {
 */
 
 # ECS Service import a manual service
-resource "aws_ecs_service" "Manual_ALB" {
-  name            = "Manual_ALB"
+resource "aws_ecs_service" "service_node_app" {
+  name            = "service_node_app"
   cluster         = aws_ecs_cluster.project_cluster.id
   task_definition = aws_ecs_task_definition.project_task.arn
   enable_ecs_managed_tags = true
