@@ -628,161 +628,7 @@ resource "aws_ecs_task_definition" "project_task" {
 }
 
 
-/*
-## Create EC2 Launch Configuration for the AutoScaling Group
-resource "aws_launch_configuration" "ecs_ec2_launch_config" {
-  image_id = var.ec2_image_id
-  iam_instance_profile = aws_iam_instance_profile.ecs_agent_profile.name
-  security_groups = [data.aws_security_group.public_sg.id]
-  instance_type = var.ec2_instance_type
-  key_name = var.ssh_keyname
-  associate_public_ip_address = true
-  lifecycle {
-    create_before_destroy = true
-  }
-  user_data = <<EOF
-  #!/bin/bash
-  cat <<'EOF' >> /etc/ecs/ecs.config
-  ECS_CLUSTER=project_cluster
-  ECS_CONTAINER_INSTANCE_PROPAGATE_TAGS_FROM=ec2_instance
-  EOF  
-}
-
-## Create Autoscaling group
-resource "aws_autoscaling_group" "ecs_ec2_autosacaling_group" {
-  name = "ecs-ec2-asg"
-  vpc_zone_identifier = data.aws_subnets.public_subnets.ids
-  launch_configuration = aws_launch_configuration.ecs_ec2_launch_config.name
-
-  desired_capacity = 1
-  min_size = var.min_tasks
-  max_size = var.max_tasks
-  health_check_grace_period = 300
-  health_check_type = "EC2"
-  
-  depends_on = [
-    aws_launch_configuration.ecs_ec2_launch_config
-  ]
-}
-
-## Auto Scaling plan
-resource "aws_autoscalingplans_scaling_plan" "ec2_scaling_plan" {
-  name = "ec2_scaling_plan"
-  application_source {
-    tag_filter {
-      key    = "Project"
-      values = ["ScalingEC2s"]
-    }
-  }
-  scaling_instruction {
-    max_capacity       = var.max_tasks
-    min_capacity       = var.min_tasks
-    resource_id        = format("autoScalingGroup/%s", aws_autoscaling_group.ecs_ec2_autosacaling_group.name)
-    scalable_dimension = "autoscaling:autoScalingGroup:DesiredCapacity"
-    service_namespace  = "autoscaling"
-
-    target_tracking_configuration {
-      predefined_scaling_metric_specification {
-        predefined_scaling_metric_type = "ASGAverageCPUUtilization"
-      }
-      target_value = var.asg_avg_cpu_target # Target value is reduced to demonstrate scaling
-    }
-  }
-}
-*/
-
-/*
 # ECS Service configuration - This block maintain the link between all services.
-resource "aws_ecs_service" "service_node_app" {
-  name            = "service_node_app"
-  cluster         = aws_ecs_cluster.project_cluster.id
-  task_definition = aws_ecs_task_definition.project_task.arn
-  desired_count   = 1
-  launch_type = "FARGATE"
-  #health_check_grace_period_seconds = 300
-  #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
-  network_configuration {
-    subnets = data.aws_subnets.private_subnets.ids
-  }
-  depends_on      = [
-    aws_ecs_cluster.project_cluster, 
-    aws_ecs_task_definition.project_task
-    #aws_lb_listener.alb_to_tg1,
-    #aws_lb_listener.alb_to_tg2,
-    #aws_lb_target_group.ecs_alb_tg1,
-    #aws_lb_target_group.ecs_alb_tg2
-    ]
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
-  
-  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  /*
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  
-  deployment_controller {
-    type = "CODE_DEPLOY"
-  }
-  */
-  /*
-}
-*/
-/*
-# ECS Service configuration - This block maintain the link between all services.
-resource "aws_ecs_service" "service_node_app" {
-  name            = "service_node_app"
-  cluster         = aws_ecs_cluster.project_cluster.id
-  task_definition = aws_ecs_task_definition.project_task.arn
-  desired_count   = 1
-  launch_type = "FARGATE"
-  #health_check_grace_period_seconds = 300
-  #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
-  network_configuration {
-    subnets = data.aws_subnets.private_subnets.ids
-  }
-  depends_on      = [
-    aws_ecs_cluster.project_cluster, 
-    aws_ecs_task_definition.project_task
-    #aws_lb_listener.alb_to_tg1,
-    #aws_lb_listener.alb_to_tg2,
-    #aws_lb_target_group.ecs_alb_tg1,
-    #aws_lb_target_group.ecs_alb_tg2
-    ]
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
-  
-  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  /*
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  
-  deployment_controller {
-    type = "CODE_DEPLOY"
-  }
-  */
-  /*
-}
-*/
-
-# ECS Service import a manual service
 resource "aws_ecs_service" "service_node_app" {
   name            = "service_node_app"
   cluster         = aws_ecs_cluster.project_cluster.id
@@ -828,6 +674,56 @@ resource "aws_ecs_service" "service_node_app" {
   }
   */
 }
+
+# ECS Service configuration for Blue-Green deployment
+resource "aws_ecs_service" "bg_service" {
+  name            = "bg_service"
+  cluster         = aws_ecs_cluster.project_cluster.id
+  task_definition = aws_ecs_task_definition.project_task.arn
+  enable_ecs_managed_tags = true
+  desired_count   = 1
+  launch_type = "FARGATE"
+  health_check_grace_period_seconds = 60
+  wait_for_steady_state = false
+  scheduling_strategy = "REPLICA"
+  platform_version = "LATEST"
+  #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
+  network_configuration {
+    subnets = data.aws_subnets.private_subnets.ids
+    assign_public_ip = false
+    security_groups = [data.aws_security_group.private_sg.id]
+  }
+  depends_on      = [
+    aws_ecs_cluster.project_cluster, 
+    aws_ecs_task_definition.project_task,
+    aws_lb_listener.alb_to_tg1,
+    aws_lb_listener.alb_to_tg2,
+    aws_lb_target_group.ecs_alb_tg1,
+    aws_lb_target_group.ecs_alb_tg2
+    ]
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+  
+  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
+    container_name   = "AppTask"
+    container_port   = 80
+  }
+  /*
+  load_balancer {
+    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
+    container_name   = "AppTask"
+    container_port   = 80
+  }
+  */
+  deployment_controller {
+    type = "CODE_DEPLOY"
+  }
+  
+}
+
 
 # Autoscaling for ECS Service instances
 resource "aws_appautoscaling_target" "ecs_target" {
