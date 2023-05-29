@@ -627,7 +627,7 @@ resource "aws_ecs_task_definition" "project_task" {
   }
 }
 
-
+/*
 # ECS Service configuration - This block maintain the link between all services.
 resource "aws_ecs_service" "service_node_app" {
   name            = "service_node_app"
@@ -673,7 +673,9 @@ resource "aws_ecs_service" "service_node_app" {
     type = "CODE_DEPLOY"
   }
   */
+  /*
 }
+*/
 
 # ECS Service configuration for Blue-Green deployment
 resource "aws_ecs_service" "bg_service" {
