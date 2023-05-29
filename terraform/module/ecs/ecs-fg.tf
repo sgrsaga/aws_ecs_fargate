@@ -528,6 +528,7 @@ resource "aws_lb_listener" "alb_to_tg1" {
   }
 }
 
+/*
 # Links ALB to TG with lister rule secondary
 resource "aws_lb_listener" "alb_to_tg2" {
   load_balancer_arn = aws_lb.ecs_lb.arn
@@ -543,9 +544,10 @@ resource "aws_lb_listener" "alb_to_tg2" {
       status_code = "HTTP_301"
     }
     */
+/*
   }
 }
-
+*/
 
 # Create ECR repository for the image to store
 resource "aws_ecr_repository" "project_repo" {
