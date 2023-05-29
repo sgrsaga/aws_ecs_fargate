@@ -678,8 +678,8 @@ resource "aws_ecs_service" "service_node_app" {
 */
 
 # ECS Service configuration for Blue-Green deployment
-resource "aws_ecs_service" "bg_service" {
-  name            = "bg_service"
+resource "aws_ecs_service" "service_node_app" {
+  name            = "service_node_app"
   cluster         = aws_ecs_cluster.project_cluster.id
   task_definition = aws_ecs_task_definition.project_task.arn
   enable_ecs_managed_tags = true
