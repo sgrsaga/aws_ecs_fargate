@@ -528,11 +528,11 @@ resource "aws_lb_listener" "alb_to_tg1" {
   }
 }
 
-/*
+
 # Links ALB to TG with lister rule secondary
 resource "aws_lb_listener" "alb_to_tg2" {
   load_balancer_arn = aws_lb.ecs_lb.arn
-  port = 80
+  port = 8080
   protocol = "HTTP"
   default_action {
     target_group_arn = aws_lb_target_group.ecs_alb_tg2.id
@@ -544,10 +544,9 @@ resource "aws_lb_listener" "alb_to_tg2" {
       status_code = "HTTP_301"
     }
     */
-/*
   }
 }
-*/
+
 
 # Create ECR repository for the image to store
 resource "aws_ecr_repository" "project_repo" {
