@@ -92,6 +92,7 @@ module "ecs-service-blue-green-deployment" {
   ecr_image_url = module.utilities_resources.ecr_image_url
   sns_topic_arn = module.utilities_resources.sns_topic
   port = 80
+  environment_list = [{name="foo", value="bar"}]
   cluster = module.utilities_resources.ecs_cluster
   depends_on = [ module.utilities_resources ]
 }
