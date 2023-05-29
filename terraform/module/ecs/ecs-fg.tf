@@ -497,7 +497,7 @@ resource "aws_lb_target_group" "ecs_alb_tg1" {
 resource "aws_lb_target_group" "ecs_alb_tg2" {
   name     = "ecs-alb-tg2"
   target_type = "ip"
-  port     = 8080
+  port     = 80
   protocol = "HTTP"
   vpc_id   = var.vpc_id
   health_check {
