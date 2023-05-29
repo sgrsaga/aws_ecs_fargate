@@ -79,6 +79,25 @@ module "aurora_pg_database" {
  }
 */
 
+## Utilities Module
+module "utilities_resources" {
+  source = "../module/utilities"
+}
+
+## Direct ECS Blue Green
+module "ecs-service-blue-green-deployment" {
+  source  = "hendrixroa/ecs-service-blue-green-deployment/aws"
+  version = "2.2.5"
+  # insert the 4 required variables here
+  ecr_image_url = module.utilities_resources.ecr_image_url
+  sns_topic_arn = module.utilities_resources.sns_topic
+  port = 80
+  cluster = module.utilities_resources.ecs_cluster
+  depends_on = [ module.utilities_resources ]
+}
+
+
+/*
 ## 3. Call ECS creation module
 module "ecs_cluster" {
   source = "../module/ecs"
@@ -99,7 +118,7 @@ module "ecs_cluster" {
   ecs_task_avg_cpu_target = var.ecs_task_avg_cpu_target
   depends_on = [module.main_network] 
 }
-
+*/
 
 /*
 
