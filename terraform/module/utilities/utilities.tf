@@ -4,8 +4,10 @@
 # DEfine Few Local variables
 locals {
   log_group = "codebuild_log_group"
-  repo_name = "BlueGreenRepo"
+  repo_name = "blue_green_repo"
+  codebuild_project = "ECS_Build"
   artifact_s3_bucket = "code-artifact-sgr-20230530"
+  cloudwatch_logs = "CodeBuildLG"
 }
 
 # Create IAM Role
@@ -488,8 +490,8 @@ resource "aws_ecs_service" "service_node_app" {
 # Manually create and refer due to default branch requirement
 ## Code Commit
 resource "aws_codecommit_repository" "repo" {
-  repository_name = "blue_green_repo"
-  description     = "blue_green_repo Repository"
+  repository_name = "${local.repo_name}"
+  description     = "${local.repo_name} Repository"
 }
 
 
@@ -533,8 +535,8 @@ resource "aws_cloudwatch_event_target" "event_target" {
 
 ## Code Build
 resource "aws_codebuild_project" "codebuild" {
-  name          = "ECS_Build"
-  description   = "ECS_Build Codebuild Project"
+  name          = "${local.codebuild_project}"
+  description   = "${local.codebuild_project} Codebuild Project"
   build_timeout = "5"
   ## HARD Coded role
   service_role  = aws_iam_role.CodeBuildRoleForECS.arn
@@ -570,7 +572,7 @@ resource "aws_codebuild_project" "codebuild" {
   logs_config {
     cloudwatch_logs {
       status = "ENABLED"
-      group_name = "CodeBuildLG"
+      group_name = "${local.cloudwatch_logs}"
     }
   }
   project_visibility = "PRIVATE"
@@ -620,7 +622,7 @@ resource "aws_codebuild_project" "ECS_Build_Project" {
 }
 */
 
-
+/*
 ## Code Deploy
 resource "aws_codedeploy_app" "codedeploy_app" {
   compute_platform = "ECS"
