@@ -630,13 +630,11 @@ resource "aws_codebuild_project" "codebuild" {
       value = data.aws_caller_identity.caller_identity.account_id
     }
   }
-  /*
   vpc_config {
     vpc_id = var.vpc_id
     subnets = data.aws_subnets.private_subnets.ids
     security_group_ids = [ data.aws_security_group.private_sg.id ]
   }
-  */
   logs_config {
     cloudwatch_logs {
       status = "ENABLED"
@@ -646,7 +644,7 @@ resource "aws_codebuild_project" "codebuild" {
   project_visibility = "PRIVATE"
   source {
     type      = "CODECOMMIT"
-    #buildspec = "buildspec.yml"
+    buildspec = "buildspec.yml"
     location = aws_codecommit_repository.repo.clone_url_http
     git_clone_depth = 1
   }
