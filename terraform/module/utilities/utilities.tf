@@ -424,6 +424,44 @@ resource "aws_codebuild_project" "codebuild" {
 }
 
 
+## Import a Build project
+## Code Build
+resource "aws_codebuild_project" "ECS_Build_Project" {
+  name          = "ECS_Build_Project"
+  description   = "ECS_Build Codebuild Project"
+  build_timeout = "5"
+  ## HARD Coded role
+  service_role  = "arn:aws:iam::598792377165:role/service-role/codebuild-MyNewBuildProject-service-role"
+
+  artifacts {
+    type = "CODEPIPELINE"
+  }
+
+  environment {
+    compute_type                = "BUILD_GENERAL1_SMALL"
+    image                       = "aws/codebuild/standard:6.0"
+    type                        = "LINUX_CONTAINER"
+    image_pull_credentials_type = "CODEBUILD"
+    privileged_mode             = true
+
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = aws_ecr_repository.project_repo.name
+    }
+
+    environment_variable {
+      name  = "AWS_ACCOUNT_ID"
+      value = data.aws_caller_identity.caller_identity.account_id
+    }
+  }
+
+  source {
+    type      = "CODECOMMIT"
+    buildspec = "buildspec.yml"
+  }
+}
+
+
 ## Code Deploy
 resource "aws_codedeploy_app" "codedeploy_app" {
   compute_platform = "ECS"
