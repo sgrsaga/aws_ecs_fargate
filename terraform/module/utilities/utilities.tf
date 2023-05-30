@@ -475,19 +475,19 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
   load_balancer_info {
     target_group_pair_info {
       target_group {
-        name = aws_alb_target_group.ecs_alb_tg1.name
+        name = aws_lb_target_group.ecs_alb_tg1.name
       }
 
       target_group {
-        name = aws_alb_target_group.ecs_alb_tg2.name
+        name = aws_lb_target_group.ecs_alb_tg2.name
       }
 
       prod_traffic_route {
-        listener_arns = [aws_alb_listener.alb_to_tg1.arn]
+        listener_arns = [aws_lb_listener.alb_to_tg1.arn]
       }
 
       test_traffic_route {
-        listener_arns = [aws_alb_listener.alb_to_tg2.arn]
+        listener_arns = [aws_lb_listener.alb_to_tg2.arn]
       }
     }
   }
