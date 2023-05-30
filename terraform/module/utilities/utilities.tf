@@ -303,7 +303,6 @@ resource "aws_ecs_service" "service_node_app" {
   health_check_grace_period_seconds = 60
   wait_for_steady_state = false
   scheduling_strategy = "REPLICA"
-  platform_version = "LATEST"
   #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
   network_configuration {
     subnets = data.aws_subnets.private_subnets.ids
