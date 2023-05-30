@@ -575,11 +575,13 @@ resource "aws_codebuild_project" "codebuild" {
       value = data.aws_caller_identity.caller_identity.account_id
     }
   }
+  /*
   vpc_config {
     vpc_id = var.vpc_id
     subnets = data.aws_subnets.private_subnets.ids
     security_group_ids = [ data.aws_security_group.private_sg.id ]
   }
+  */
   logs_config {
     cloudwatch_logs {
       status = "ENABLED"
