@@ -551,7 +551,7 @@ resource "aws_codebuild_project" "codebuild" {
   build_timeout = "5"
   ## HARD Coded role
   service_role  = aws_iam_role.CodeBuildRoleForECS.arn
-  source_version = aws_codecommit_repository.repo.default_branch
+  source_version = "refs/heads/master"
   artifacts {
     type = "S3"
     location = aws_s3_bucket.code_artifact.bucket
