@@ -595,13 +595,6 @@ resource "aws_s3_bucket" "code_artifact" {
   }
 }
 
-
-  log_group = "codebuild_log_group"
-  repo_name = "blue_green_repo"
-  codebuild_project = "ECS_Build"
-  artifact_s3_bucket = "code-artifact-sgr-20230530" 
-  cloudwatch_logs = "CodeBuildLG"
-
 ## Code Build
 resource "aws_codebuild_project" "codebuild" {
   name          = "${local.codebuild_project}"
