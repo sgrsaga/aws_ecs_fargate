@@ -30,6 +30,11 @@ data "aws_subnets" "private_subnets" {
     }
 }
 
+## GEt the service Account ID
+data "aws_elb_service_account" "service_account_id" {}
+## Get the callert identity
+data "aws_caller_identity" "caller_identity" {}
+
 ## Create S3 bucket for access_logs
 resource "aws_s3_bucket" "lb_logs" {
   bucket = var.alb_access_log_s3_bucket
