@@ -342,12 +342,15 @@ resource "aws_ecs_service" "service_node_app" {
 }
 
 
+# Manually create and refer due to default branch requirement
 ## Code Commit
 resource "aws_codecommit_repository" "repo" {
   repository_name = "blue_green_repo"
   description     = "blue_green_repo Repository"
 }
 
+
+/*
 resource "aws_cloudwatch_event_rule" "commit" {
   name        = "blue_green_repocapture-commit-event"
   description = "Capture blue_green_repo repo commit"
@@ -361,7 +364,7 @@ resource "aws_cloudwatch_event_rule" "commit" {
     "CodeCommit Repository State Change"
   ],
   "resources": [
-   "${aws_codecommit_repository.repo.arn}"
+   "${data.aws_codecommit_repository.repo.arn}"
   ],
   "detail": {
     "referenceType": [
@@ -374,6 +377,7 @@ resource "aws_cloudwatch_event_rule" "commit" {
 }
 EOF
 }
+*/
 
 /*
 resource "aws_cloudwatch_event_target" "event_target" {
