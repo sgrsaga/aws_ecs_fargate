@@ -6,7 +6,7 @@ locals {
   log_group = "codebuild_log_group"
   repo_name = "blue_green_repo"
   codebuild_project = "ECS_Build"
-  artifact_s3_bucket = "code-artifact-sgr-20230530"
+  artifact_s3_bucket = "code-artifact-sgr-20230530" 
   cloudwatch_logs = "CodeBuildLG"
 }
 
@@ -533,6 +533,17 @@ resource "aws_cloudwatch_event_target" "event_target" {
 }
 */
 
+# S3 bucket for Artifacts
+resource "aws_s3_bucket" "code_artifact" {
+  bucket = "${local.artifact_s3_bucket}"
+  force_destroy = true ## To handle none empty S3 bucket. Destroy with Terraform destroy.
+
+  tags = {
+    Name        = "code_artifact"
+    Environment = "Dev"
+  }
+}
+
 ## Code Build
 resource "aws_codebuild_project" "codebuild" {
   name          = "${local.codebuild_project}"
@@ -695,16 +706,7 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
   }
 }
 
-# S3 bucket for Artifacts
-resource "aws_s3_bucket" "code_artifact" {
-  bucket = "code-artifact-sgr-20230530"
-  force_destroy = true ## To handle none empty S3 bucket. Destroy with Terraform destroy.
 
-  tags = {
-    Name        = "code_artifact"
-    Environment = "Dev"
-  }
-}
 
 /*
 #CodeBuild Pipeline
