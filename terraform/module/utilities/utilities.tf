@@ -45,18 +45,6 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
         {
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:/aws/codebuild/${local.log_group}",
-                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:/aws/codebuild/${local.log_group}:*"
-            ],
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-            ]
-        },
-        {
-            "Effect": "Allow",
-            "Resource": [
                 "arn:aws:s3:::codepipeline-ap-south-1-*"
             ],
             "Action": [
@@ -66,6 +54,81 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "s3:GetBucketAcl",
                 "s3:GetBucketLocation"
             ]
+        },
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "logs:ListTagsLogGroup",
+                "logs:GetDataProtectionPolicy",
+                "logs:DeleteDataProtectionPolicy",
+                "logs:DeleteSubscriptionFilter",
+                "logs:DescribeLogStreams",
+                "logs:DescribeSubscriptionFilters",
+                "logs:StartQuery",
+                "logs:DescribeMetricFilters",
+                "logs:CreateExportTask",
+                "logs:CreateLogStream",
+                "logs:DeleteMetricFilter",
+                "logs:DeleteRetentionPolicy",
+                "logs:AssociateKmsKey",
+                "logs:FilterLogEvents",
+                "logs:DisassociateKmsKey",
+                "logs:PutDataProtectionPolicy",
+                "logs:DescribeLogGroups",
+                "logs:DeleteLogGroup",
+                "logs:Unmask",
+                "logs:CreateLogGroup",
+                "logs:ListTagsForResource",
+                "logs:PutMetricFilter",
+                "logs:PutSubscriptionFilter",
+                "logs:PutRetentionPolicy",
+                "logs:GetLogGroupFields"
+            ],
+            "Resource": "arn:aws:logs:*:598792377165:log-group:*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": [
+                "logs:PutDestinationPolicy",
+                "logs:GetLogEvents",
+                "logs:DeleteDestination",
+                "logs:PutSubscriptionFilter",
+                "logs:PutDestination",
+                "logs:DeleteLogStream",
+                "logs:PutLogEvents",
+                "logs:ListTagsForResource"
+            ],
+            "Resource": [
+                "arn:aws:logs:*:598792377165:log-group:*:log-stream:*",
+                "arn:aws:logs:*:598792377165:destination:*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor2",
+            "Effect": "Allow",
+            "Action": [
+                "logs:DescribeQueries",
+                "logs:GetLogRecord",
+                "logs:StopQuery",
+                "logs:TestMetricFilter",
+                "logs:DeleteQueryDefinition",
+                "logs:PutQueryDefinition",
+                "logs:GetLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:Link",
+                "logs:CreateLogDelivery",
+                "logs:DescribeExportTasks",
+                "logs:GetQueryResults",
+                "logs:UpdateLogDelivery",
+                "logs:CancelExportTask",
+                "logs:DeleteLogDelivery",
+                "logs:DescribeQueryDefinitions",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeDestinations"
+            ],
+            "Resource": "*"
         },
         {
             "Effect": "Allow",
@@ -101,19 +164,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "arn:aws:codebuild:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:build/${local.codebuild_project}-*"
             ]
         },
-		{
-            "Effect": "Allow",
-            "Resource": [
-                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:${local.log_group}",
-                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:${local.log_group}:*"
-            ],
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:PutLogEvents"
-            ]
-        },
-		{
+        {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Action": [
@@ -543,6 +594,13 @@ resource "aws_s3_bucket" "code_artifact" {
     Environment = "Dev"
   }
 }
+
+
+  log_group = "codebuild_log_group"
+  repo_name = "blue_green_repo"
+  codebuild_project = "ECS_Build"
+  artifact_s3_bucket = "code-artifact-sgr-20230530" 
+  cloudwatch_logs = "CodeBuildLG"
 
 ## Code Build
 resource "aws_codebuild_project" "codebuild" {
