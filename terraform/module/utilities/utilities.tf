@@ -361,6 +361,7 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
 # S3 bucket for Artifacts
 resource "aws_s3_bucket" "code_artifact" {
   bucket = "code-artifact-sgr-20230530"
+  force_destroy = true ## To handle none empty S3 bucket. Destroy with Terraform destroy.
 
   tags = {
     Name        = "code_artifact"
