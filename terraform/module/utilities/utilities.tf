@@ -591,7 +591,7 @@ resource "aws_codebuild_project" "codebuild" {
   project_visibility = "PRIVATE"
   source {
     type      = "CODECOMMIT"
-    buildspec = "buildspec.yml"
+    #buildspec = "buildspec.yml"
     location = aws_codecommit_repository.repo.clone_url_http
     git_clone_depth = 1
   }
