@@ -43,6 +43,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
     "Version": "2012-10-17",
     "Statement": [
         {
+            "Sid": "VisualEditor0",
             "Effect": "Allow",
             "Resource": [
                 "arn:aws:s3:::codepipeline-ap-south-1-*"
@@ -56,7 +57,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             ]
         },
         {
-            "Sid": "VisualEditor0",
+            "Sid": "VisualEditor1",
             "Effect": "Allow",
             "Action": [
                 "logs:ListTagsLogGroup",
@@ -88,7 +89,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Resource": "arn:aws:logs:*:598792377165:log-group:*"
         },
         {
-            "Sid": "VisualEditor1",
+            "Sid": "VisualEditor2",
             "Effect": "Allow",
             "Action": [
                 "logs:PutDestinationPolicy",
@@ -106,7 +107,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             ]
         },
         {
-            "Sid": "VisualEditor2",
+            "Sid": "VisualEditor3",
             "Effect": "Allow",
             "Action": [
                 "logs:DescribeQueries",
@@ -131,6 +132,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Resource": "*"
         },
         {
+            "Sid": "VisualEditor4",
             "Effect": "Allow",
             "Resource": [
                 "arn:aws:codecommit:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:${local.repo_name}"
@@ -140,6 +142,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             ]
         },
         {
+            "Sid": "VisualEditor5",
             "Effect": "Allow",
             "Resource": [
                 "arn:aws:s3:::${local.artifact_s3_bucket}",
@@ -152,6 +155,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             ]
         },
         {
+            "Sid": "VisualEditor6",
             "Effect": "Allow",
             "Action": [
                 "codebuild:CreateReportGroup",
@@ -165,7 +169,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             ]
         },
         {
-            "Sid": "VisualEditor0",
+            "Sid": "VisualEditor7",
             "Effect": "Allow",
             "Action": [
                 "ecr:GetRegistryPolicy",
@@ -185,7 +189,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Resource": "*"
         },
         {
-            "Sid": "VisualEditor1",
+            "Sid": "VisualEditor8",
             "Effect": "Allow",
             "Action": "ecr:*",
             "Resource": "arn:aws:ecr:*:${data.aws_caller_identity.caller_identity.account_id}:repository/*"
