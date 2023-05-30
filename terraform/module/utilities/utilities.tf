@@ -98,7 +98,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "codebuild:BatchPutCodeCoverages"
             ],
             "Resource": [
-                "arn:aws:codebuild:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:report-group/${local.log_group}-*"
+                "arn:aws:codebuild:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:build/${local.codebuild_project}-*"
             ]
         },
 		{
