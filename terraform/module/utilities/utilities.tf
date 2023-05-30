@@ -393,7 +393,7 @@ resource "aws_codebuild_project" "codebuild" {
   description   = "ECS_Build Codebuild Project"
   build_timeout = "5"
   ## HARD Coded role
-  service_role  = "arn:aws:iam::598792377165:role/service-role/codebuild-MyNewBuildProject-service-role"
+  service_role  = "arn:aws:iam::598792377165:role/service-role/codebuild-bg_1-service-role"
 
   artifacts {
     type = "S3"
