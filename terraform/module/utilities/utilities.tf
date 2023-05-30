@@ -1,3 +1,144 @@
+## Create CodeBuild role
+
+locals {
+  log_group = "codebuild_log_group"
+  repo_name = "BlueGreenRepo"
+  artifact_s3_bucket = "code-artifact-sgr-20230530"
+}
+
+
+resource "aws_iam_role" "CodeBuildRoleForECS" {
+  name = "CodeBuildRoleForECS"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2008-10-17",
+    "Statement": [
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "codebuild.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+}
+
+
+## Creating policy for CodeBuildRoleForECS
+resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
+  name = aws_iam_role.CodeBuildRoleForECS.name
+  role = aws_iam_role.CodeBuildRoleForECS.id
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:/aws/codebuild/${local.log_group}",
+                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:/aws/codebuild/${local.log_group}:*"
+            ],
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::codepipeline-ap-south-1-*"
+            ],
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "s3:GetBucketAcl",
+                "s3:GetBucketLocation"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:codecommit:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:${local.repo_name}"
+            ],
+            "Action": [
+                "codecommit:GitPull"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:s3:::${local.artifact_s3_bucket}",
+                "arn:aws:s3:::${local.artifact_s3_bucket}/*"
+            ],
+            "Action": [
+                "s3:PutObject",
+                "s3:GetBucketAcl",
+                "s3:GetBucketLocation"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "codebuild:CreateReportGroup",
+                "codebuild:CreateReport",
+                "codebuild:UpdateReport",
+                "codebuild:BatchPutTestCases",
+                "codebuild:BatchPutCodeCoverages"
+            ],
+            "Resource": [
+                "arn:aws:codebuild:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:report-group/${local.log_group}-*"
+            ]
+        },
+		{
+            "Effect": "Allow",
+            "Resource": [
+                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:${local.log_group}",
+                "arn:aws:logs:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:log-group:${local.log_group}:*"
+            ],
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ]
+        },
+		{
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetRegistryPolicy",
+                "ecr:CreateRepository",
+                "ecr:DescribeRegistry",
+                "ecr:DescribePullThroughCacheRules",
+                "ecr:GetAuthorizationToken",
+                "ecr:PutRegistryScanningConfiguration",
+                "ecr:CreatePullThroughCacheRule",
+                "ecr:DeletePullThroughCacheRule",
+                "ecr:PutRegistryPolicy",
+                "ecr:GetRegistryScanningConfiguration",
+                "ecr:BatchImportUpstreamImage",
+                "ecr:DeleteRegistryPolicy",
+                "ecr:PutReplicationConfiguration"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "ecr:*",
+            "Resource": "arn:aws:ecr:*:${data.aws_caller_identity.caller_identity.account_id}:repository/*"
+        }
+    ]
+})
+}
+
 ########## Create dependancy service for ECS Cluster service
 
 ## Get Public Security Group to apply for the Database
@@ -393,7 +534,7 @@ resource "aws_codebuild_project" "codebuild" {
   description   = "ECS_Build Codebuild Project"
   build_timeout = "5"
   ## HARD Coded role
-  service_role  = "arn:aws:iam::598792377165:role/service-role/codebuild-bg_1-service-role"
+  service_role  = aws_iam_role.CodeBuildRoleForECS.arn
 
   artifacts {
     type = "S3"
