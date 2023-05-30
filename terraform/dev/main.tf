@@ -82,8 +82,12 @@ module "aurora_pg_database" {
 ## Utilities Module
 module "utilities_resources" {
   source = "../module/utilities"
+  vpc_id = module.main_network.vpc_id
+  ## ALB Access logs S3 bucket
+  alb_access_log_s3_bucket = var.alb_access_log_s3_bucket
 }
 
+/*
 ## Direct ECS Blue Green
 module "ecs-service-blue-green-deployment" {
   source  = "hendrixroa/ecs-service-blue-green-deployment/aws"
@@ -96,7 +100,7 @@ module "ecs-service-blue-green-deployment" {
   cluster = module.utilities_resources.ecs_cluster
   depends_on = [ module.utilities_resources ]
 }
-
+*/
 
 /*
 ## 3. Call ECS creation module
