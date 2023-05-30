@@ -433,6 +433,7 @@ resource "aws_codebuild_project" "codebuild" {
   source {
     type      = "CODECOMMIT"
     buildspec = "buildspec.yml"
+    location = aws_codecommit_repository.repo.clone_url_http
   }
 }
 
