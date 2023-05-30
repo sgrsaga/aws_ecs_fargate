@@ -551,7 +551,7 @@ resource "aws_codebuild_project" "codebuild" {
   build_timeout = "5"
   ## HARD Coded role
   service_role  = aws_iam_role.CodeBuildRoleForECS.arn
-
+  source_version = aws_codecommit_repository.repo.default_branch
   artifacts {
     type = "S3"
     location = aws_s3_bucket.code_artifact.bucket
@@ -591,6 +591,7 @@ resource "aws_codebuild_project" "codebuild" {
     type      = "CODECOMMIT"
     buildspec = "buildspec.yml"
     location = aws_codecommit_repository.repo.clone_url_http
+    git_clone_depth = 1
   }
 }
 
