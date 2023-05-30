@@ -396,12 +396,14 @@ resource "aws_codebuild_project" "codebuild" {
   service_role  = "arn:aws:iam::598792377165:role/service-role/codebuild-MyNewBuildProject-service-role"
 
   artifacts {
-    type = "CODEPIPELINE"
+    type = "S3"
+    location = aws_s3_bucket.code_artifact.bucket
+    override_artifact_name = true
   }
 
   environment {
     compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:6.0"
+    image                       = "aws/codebuild/amazonlinux2-x86_64-standard:5.0"
     type                        = "LINUX_CONTAINER"
     image_pull_credentials_type = "CODEBUILD"
     privileged_mode             = true
@@ -413,17 +415,28 @@ resource "aws_codebuild_project" "codebuild" {
 
     environment_variable {
       name  = "AWS_ACCOUNT_ID"
-      value = "598792377165"
+      value = data.aws_caller_identity.caller_identity.account_id
     }
   }
-
+  vpc_config {
+    vpc_id = var.vpc_id
+    subnets = [ data.aws_subnets.private_subnets.ids ]
+    security_group_ids = [ data.aws_security_group.private_sg.id ]
+  }
+  logs_config {
+    cloudwatch_logs {
+      status = "ENABLED"
+      group_name = "CodeBuildLG"
+    }
+  }
+  project_visibility = "PRIVATE"
   source {
-    type      = "CODEPIPELINE"
+    type      = "CODECOMMIT"
     buildspec = "buildspec.yml"
   }
 }
 
-
+/*
 ## Import a Build project
 ## Code Build
 resource "aws_codebuild_project" "ECS_Build_Project" {
@@ -460,6 +473,7 @@ resource "aws_codebuild_project" "ECS_Build_Project" {
     buildspec = "buildspec.yml"
   }
 }
+*/
 
 
 ## Code Deploy
@@ -545,6 +559,7 @@ resource "aws_s3_bucket" "code_artifact" {
   }
 }
 
+/*
 #CodeBuild Pipeline
 resource "aws_codepipeline" "codepipeline" {
   name     = "CodePipeline"
@@ -612,3 +627,4 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
 }
+*/
