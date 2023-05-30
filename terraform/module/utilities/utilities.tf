@@ -1,12 +1,14 @@
+####################################
 ## Create CodeBuild role
 
+# DEfine Few Local variables
 locals {
   log_group = "codebuild_log_group"
   repo_name = "BlueGreenRepo"
   artifact_s3_bucket = "code-artifact-sgr-20230530"
 }
 
-
+# Create IAM Role
 resource "aws_iam_role" "CodeBuildRoleForECS" {
   name = "CodeBuildRoleForECS"
 
@@ -139,6 +141,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
 })
 }
 
+############################################################
 ########## Create dependancy service for ECS Cluster service
 
 ## Get Public Security Group to apply for the Database
