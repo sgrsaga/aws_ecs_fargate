@@ -1,3 +1,92 @@
+########## Create dependancy service for ECS Cluster service
+
+## Get Public Security Group to apply for the Database
+data "aws_security_group" "public_sg" {
+  tags = {
+    Name = "PUBLIC_SG"
+  }
+}
+
+## Get Private Security Group to apply for the Database
+data "aws_security_group" "private_sg" {
+  tags = {
+    Name = "PRIVATE_SG"
+  }
+}
+
+## Get Public SubnetList
+data "aws_subnets" "public_subnets" {
+    filter {
+      name = "tag:Access"
+      values = ["PUBLIC"]
+    }
+}
+
+## Get Private SubnetList
+data "aws_subnets" "private_subnets" {
+    filter {
+      name = "tag:Access"
+      values = ["PRIVATE"]
+    }
+}
+
+## Create S3 bucket for access_logs
+resource "aws_s3_bucket" "lb_logs" {
+  bucket = var.alb_access_log_s3_bucket
+  force_destroy = true ## To handle none empty S3 bucket. Destroy with Terraform destroy.
+  
+  tags = {
+    Name        = "ALB_LOG_Bucket"
+  }
+}
+
+
+## Create ecsTaskExecutionRole
+resource "aws_iam_role" "ecsTaskExecutionRoleNew" {
+  name = "ecsTaskExecutionRoleNew"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2008-10-17",
+    "Statement": [
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "EcsTaskExcPolicyRoleAttach_policy" {
+  name = aws_iam_role.ecsTaskExecutionRoleNew.name
+  role = aws_iam_role.ecsTaskExecutionRoleNew.id
+
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        }
+    ]
+})
+}
+
+
+
 # Create ECR repository for the image to store
 resource "aws_ecr_repository" "project_repo" {
   name = "project_repo_aws"
@@ -275,7 +364,7 @@ resource "aws_codebuild_project" "codebuild" {
 
     environment_variable {
       name  = "AWS_ACCOUNT_ID"
-      value = data.aws_caller_identity.current.account_id
+      value = "598792377165"
     }
   }
 
