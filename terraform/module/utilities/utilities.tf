@@ -197,7 +197,11 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
         {
             "Sid": "VisualEditor9",
             "Effect": "Allow",
-            "Action": "ec2:DescribeSecurityGroups",
+            "Action": [
+                "ec2:DescribeSubnets",
+                "ec2:DescribeVpcs",
+                "ec2:DescribeSecurityGroups"
+            ],
             "Resource": "*"
         }
     ]
