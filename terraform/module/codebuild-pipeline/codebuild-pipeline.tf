@@ -13,6 +13,9 @@ locals {
   codebuild_project = "ECS_Build"
   artifact_s3_bucket = "code-artifact-sgr-20230530" 
   cloudwatch_logs = "CodeBuildLG"
+  deploy_app = "ECS_Blue_Green_App"
+  deployment_group = "ECS_Blue_Green_App_DG"
+  code_pipeline_name = "ECS_Blue_Green_Pipeline"
 }
 
 # Create IAM Role
@@ -228,6 +231,12 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                     "ec2:AuthorizedService": "codebuild.amazonaws.com"
                 }
             }
+        },
+        {
+            "Sid": "VisualEditor11",
+            "Effect": "Allow",
+            "Action": "ecs:DescribeTaskDefinition",
+            "Resource": "*"
         }
     ]
 })
@@ -316,6 +325,124 @@ resource "aws_codebuild_project" "codebuild" {
 }
 
 
+## Create CodeDeploy Application
+
+resource "aws_codedeploy_app" "ecodedeploy_app" {
+  compute_platform = "ECS"
+  name             = "${local.deploy_app}"
+}
+
+## CodeDeployment Group service role
+resource "aws_iam_role" "CodeDeploymentGroupRoleForECS" {
+  name = "CodeDeploymentGroupRoleForECS"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "codedeploy.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+}
+
+## Creating policy for CodeBuildRoleForECS
+resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
+  name = aws_iam_role.CodeDeploymentGroupRoleForECS.name
+  role = aws_iam_role.CodeDeploymentGroupRoleForECS.id
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "ecs:DescribeServices",
+                "ecs:CreateTaskSet",
+                "ecs:UpdateServicePrimaryTaskSet",
+                "ecs:DeleteTaskSet",
+                "elasticloadbalancing:DescribeTargetGroups",
+                "elasticloadbalancing:DescribeListeners",
+                "elasticloadbalancing:ModifyListener",
+                "elasticloadbalancing:DescribeRules",
+                "elasticloadbalancing:ModifyRule",
+                "lambda:InvokeFunction",
+                "cloudwatch:DescribeAlarms",
+                "sns:Publish",
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "iam:PassRole"
+            ],
+            "Effect": "Allow",
+            "Resource": "*",
+            "Condition": {
+                "StringLike": {
+                    "iam:PassedToService": [
+                        "ecs-tasks.amazonaws.com"
+                    ]
+                }
+            }
+        }
+    ]
+})
+}
+
+## Create CodeDeployment Application Deployment Group
+resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
+    app_name = aws_codedeploy_app.ecodedeploy_app.name
+    deployment_group_name = "${local.deployment_group}"
+    service_role_arn = aws_iam_role.CodeDeploymentGroupRoleForECS.arn
+
+    deployment_style {
+      deployment_type = "BLUE_GREEN"
+      deployment_option = "WITH_TRAFFIC_CONTROL"
+    }
+    blue_green_deployment_config {
+      terminate_blue_instances_on_deployment_success {
+        action = "TERMINATE"
+        termination_wait_time_in_minutes = 20
+      }
+      deployment_ready_option {
+        action_on_timeout = "STOP_DEPLOYMENT"
+        wait_time_in_minutes = 25
+      }
+    }
+    ecs_service {
+      cluster_name = var.cluster_name
+      service_name = var.service_name
+    }
+    load_balancer_info {
+      target_group_pair_info {
+        prod_traffic_route {
+          listener_arns = [var.prod_listner_arn]
+        }
+        test_traffic_route {
+          listener_arns = [var.test_listner_arn]
+        }
+        target_group {
+          name = var.tg1
+        }
+        target_group {}
+          name = var.tg2
+        }
+      }
+}
+
+
 /*
 resource "aws_cloudwatch_event_rule" "commit" {
   name        = "blue_green_repocapture-commit-event"
@@ -354,12 +481,214 @@ resource "aws_cloudwatch_event_target" "event_target" {
 }
 */
 
-/*
+## Code Pipeline Role
+resource "aws_iam_role" "CodePipelineRoleForECS" {
+  name = "CodePipelineRoleForECS"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "codepipeline.amazonaws.com"
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+EOF
+}
+
+## Creating policy for CodeBuildRoleForECS
+resource "aws_iam_role_policy" "CodePipelineRoleForECS_policy" {
+  name = aws_iam_role.CodePipelineRoleForECS.name
+  role = aws_iam_role.CodePipelineRoleForECS.id
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    "Statement": [
+        {
+            "Action": [
+                "iam:PassRole"
+            ],
+            "Resource": "*",
+            "Effect": "Allow",
+            "Condition": {
+                "StringEqualsIfExists": {
+                    "iam:PassedToService": [
+                        "cloudformation.amazonaws.com",
+                        "elasticbeanstalk.amazonaws.com",
+                        "ec2.amazonaws.com",
+                        "ecs-tasks.amazonaws.com"
+                    ]
+                }
+            }
+        },
+        {
+            "Action": [
+                "codecommit:CancelUploadArchive",
+                "codecommit:GetBranch",
+                "codecommit:GetCommit",
+                "codecommit:GetRepository",
+                "codecommit:GetUploadArchiveStatus",
+                "codecommit:UploadArchive"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "codedeploy:CreateDeployment",
+                "codedeploy:GetApplication",
+                "codedeploy:GetApplicationRevision",
+                "codedeploy:GetDeployment",
+                "codedeploy:GetDeploymentConfig",
+                "codedeploy:RegisterApplicationRevision"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "codestar-connections:UseConnection"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "elasticbeanstalk:*",
+                "ec2:*",
+                "elasticloadbalancing:*",
+                "autoscaling:*",
+                "cloudwatch:*",
+                "s3:*",
+                "sns:*",
+                "cloudformation:*",
+                "rds:*",
+                "sqs:*",
+                "ecs:*"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "lambda:InvokeFunction",
+                "lambda:ListFunctions"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "opsworks:CreateDeployment",
+                "opsworks:DescribeApps",
+                "opsworks:DescribeCommands",
+                "opsworks:DescribeDeployments",
+                "opsworks:DescribeInstances",
+                "opsworks:DescribeStacks",
+                "opsworks:UpdateApp",
+                "opsworks:UpdateStack"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:SetStackPolicy",
+                "cloudformation:ValidateTemplate"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Action": [
+                "codebuild:BatchGetBuilds",
+                "codebuild:StartBuild",
+                "codebuild:BatchGetBuildBatches",
+                "codebuild:StartBuildBatch"
+            ],
+            "Resource": "*",
+            "Effect": "Allow"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "devicefarm:ListProjects",
+                "devicefarm:ListDevicePools",
+                "devicefarm:GetRun",
+                "devicefarm:GetUpload",
+                "devicefarm:CreateUpload",
+                "devicefarm:ScheduleRun"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "servicecatalog:ListProvisioningArtifacts",
+                "servicecatalog:CreateProvisioningArtifact",
+                "servicecatalog:DescribeProvisioningArtifact",
+                "servicecatalog:DeleteProvisioningArtifact",
+                "servicecatalog:UpdateProduct"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:ValidateTemplate"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:DescribeImages"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "states:DescribeExecution",
+                "states:DescribeStateMachine",
+                "states:StartExecution"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "appconfig:StartDeployment",
+                "appconfig:StopDeployment",
+                "appconfig:GetDeployment"
+            ],
+            "Resource": "*"
+        }
+    ],
+    "Version": "2012-10-17"
+})
+}
+
+
 #CodeBuild Pipeline
 resource "aws_codepipeline" "codepipeline" {
-  name     = "CodePipeline"
+  name     = "${local.code_pipeline_name}"
   # Hard code role
-  role_arn = "arn:aws:iam::598792377165:role/service-role/AWSCodePipelineServiceRole-ap-south-1-MyNewPipeline_without_cod"
+  role_arn =  aws_iam_role.CodePipelineRoleForECS.arn
 
   artifact_store {
     location = aws_s3_bucket.code_artifact.bucket
@@ -374,13 +703,14 @@ resource "aws_codepipeline" "codepipeline" {
       owner            = "AWS"
       provider         = "CodeCommit"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["SourceArtifact"]
 
       configuration = {
         RepositoryName        = aws_codecommit_repository.repo.repository_name
         BranchName            = "master"
         PollForSourceChanges  = false
       }
+      region = var.region
     }
   }
 
@@ -394,7 +724,7 @@ resource "aws_codepipeline" "codepipeline" {
       input_artifacts  = ["source_output"]
       output_artifacts = ["build_output"]
       version          = "1"
-
+      region = var.region
       configuration = {
         ProjectName = aws_codebuild_project.codebuild.name
       }
@@ -412,8 +742,8 @@ resource "aws_codepipeline" "codepipeline" {
       input_artifacts = ["source_output"]
 
       configuration = {
-        ApplicationName                = "ECS_Deploy"
-        DeploymentGroupName            = "ECS_Deploy_Group"
+        ApplicationName                = "${local.deploy_app}"
+        DeploymentGroupName            = "${local.deployment_group}"
         AppSpecTemplateArtifact        = "source_output"
         AppSpecTemplatePath            = "appspec.yaml"
         TaskDefinitionTemplateArtifact = "source_output"
@@ -422,4 +752,3 @@ resource "aws_codepipeline" "codepipeline" {
     }
   }
 }
-*/

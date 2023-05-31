@@ -88,3 +88,7 @@ ecs_task_avg_cpu_target = 0.25
 
 ############# Route 53 #####
 #domain_name_used = "devops-expert.online"
+
+
+############## Code Build Pipeline
+region = "ap-south-1"

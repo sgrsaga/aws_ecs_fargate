@@ -240,7 +240,6 @@ resource "aws_lb_listener" "alb_to_tg1" {
   }
 }
 
-
 # Links ALB to TG with lister rule secondary
 resource "aws_lb_listener" "alb_to_tg2" {
   load_balancer_arn = aws_lb.ecs_lb.arn
@@ -339,52 +338,5 @@ resource "aws_ecs_service" "service_node_app" {
     type = "CODE_DEPLOY"
   }
   
-}
-
-
-
-
-# ECS Service configuration for Code pipeline
-resource "aws_ecs_service" "service_node_app2" {
-  name            = "service_node_app2"
-  cluster         = aws_ecs_cluster.project_cluster.id
-  task_definition = aws_ecs_task_definition.project_task.arn
-  enable_ecs_managed_tags = true
-  desired_count   = 2
-  launch_type = "FARGATE"
-  health_check_grace_period_seconds = 60
-  wait_for_steady_state = false
-  scheduling_strategy = "REPLICA"
-  #iam_role        = aws_iam_role.ecsServiceRoleNew.arn
-  network_configuration {
-    subnets = data.aws_subnets.private_subnets.ids
-    assign_public_ip = false
-    security_groups = [data.aws_security_group.private_sg.id]
-  }
-  depends_on      = [
-    aws_ecs_cluster.project_cluster, 
-    aws_ecs_task_definition.project_task,
-    aws_lb_listener.alb_to_tg1,
-    aws_lb_listener.alb_to_tg2,
-    aws_lb_target_group.ecs_alb_tg1,
-    aws_lb_target_group.ecs_alb_tg2
-    ]
-  lifecycle {
-    ignore_changes = [desired_count]
-  }
-  
-  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  /*
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  */ 
 }
 

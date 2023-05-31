@@ -92,6 +92,13 @@ module "ecs_resources" {
 module "build_pipeline" {
   source = "../module/codebuild-pipeline"
   vpc_id = module.main_network.vpc_id
+  cluster_name = module.ecs_resources.cluster_name
+  service_name = module.ecs_resources.service_name
+  tg1 = module.ecs_resources.tg1
+  tg2 = module.ecs_resources.tg2
+  prod_listner_arn = module.ecs_resources.prod_listner_arn
+  test_listner_arn = module.ecs_resources.test_listner_arn
+  region = var.region
   depends_on = [ module.ecs_resources ]
 }
 
