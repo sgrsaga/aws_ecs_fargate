@@ -193,6 +193,12 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Effect": "Allow",
             "Action": "ecr:*",
             "Resource": "arn:aws:ecr:*:${data.aws_caller_identity.caller_identity.account_id}:repository/*"
+        },
+        {
+            "Sid": "VisualEditor9",
+            "Effect": "Allow",
+            "Action": "ec2:DescribeSecurityGroups",
+            "Resource": "*"
         }
     ]
 })
@@ -649,119 +655,6 @@ resource "aws_codebuild_project" "codebuild" {
     git_clone_depth = 1
   }
 }
-
-/*
-## Import a Build project
-## Code Build
-resource "aws_codebuild_project" "ECS_Build_Project" {
-  name          = "ECS_Build_Project"
-  description   = "ECS_Build Codebuild Project"
-  build_timeout = "5"
-  ## HARD Coded role
-  service_role  = "arn:aws:iam::598792377165:role/service-role/codebuild-MyNewBuildProject-service-role"
-
-  artifacts {
-    type = "CODEPIPELINE"
-  }
-
-  environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "aws/codebuild/standard:6.0"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "CODEBUILD"
-    privileged_mode             = true
-
-    environment_variable {
-      name  = "IMAGE_REPO_NAME"
-      value = aws_ecr_repository.project_repo.name
-    }
-
-    environment_variable {
-      name  = "AWS_ACCOUNT_ID"
-      value = data.aws_caller_identity.caller_identity.account_id
-    }
-  }
-
-  source {
-    type      = "CODECOMMIT"
-    buildspec = "buildspec.yml"
-  }
-}
-*/
-
-/*
-## Code Deploy
-resource "aws_codedeploy_app" "codedeploy_app" {
-  compute_platform = "ECS"
-  name             = "ECS_Deploy"
-}
-
-resource "aws_codedeploy_deployment_config" "config_deploy" {
-  deployment_config_name = "ECS_Deploy_config"
-  compute_platform       = "ECS"
-
-  traffic_routing_config {
-    type = "AllAtOnce"
-  }
-}
-
-
-## Deployment group
-resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
-  app_name               = aws_codedeploy_app.codedeploy_app.name
-  deployment_group_name  = "ECS_Deploy_Group"
-  # HArd coded role
-  service_role_arn       = "arn:aws:iam::598792377165:role/AwsEcsCodeDeployRole"
-  deployment_config_name = aws_codedeploy_deployment_config.config_deploy.deployment_config_name
-
-  ecs_service {
-    cluster_name = aws_ecs_cluster.project_cluster.name
-    service_name = aws_ecs_service.service_node_app.name
-  }
-
-  auto_rollback_configuration {
-    enabled = true
-    events  = ["DEPLOYMENT_FAILURE"]
-  }
-
-  deployment_style {
-    deployment_option = "WITH_TRAFFIC_CONTROL"
-    deployment_type   = "BLUE_GREEN"
-  }
-
-  blue_green_deployment_config {
-    deployment_ready_option {
-      action_on_timeout    = "CONTINUE_DEPLOYMENT"
-      wait_time_in_minutes = 0
-    }
-
-    terminate_blue_instances_on_deployment_success {
-      action                           = "TERMINATE"
-      termination_wait_time_in_minutes = 5
-    }
-  }
-
-  load_balancer_info {
-    target_group_pair_info {
-      target_group {
-        name = aws_lb_target_group.ecs_alb_tg1.name
-      }
-
-      target_group {
-        name = aws_lb_target_group.ecs_alb_tg2.name
-      }
-
-      prod_traffic_route {
-        listener_arns = [aws_lb_listener.alb_to_tg1.arn]
-      }
-
-      test_traffic_route {
-        listener_arns = [aws_lb_listener.alb_to_tg2.arn]
-      }
-    }
-  }
-}
-
 
 
 /*
