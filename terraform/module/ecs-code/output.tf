@@ -10,7 +10,7 @@ output "sns_topic" {
 
 ## ECS Cluster name
 output "cluster_name" {
-    value = aws_ecs_cluster.project_cluster 
+    value = aws_ecs_cluster.project_cluster.name
 }
 
 ## ECS Cluster service name
