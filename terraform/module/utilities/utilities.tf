@@ -207,6 +207,22 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "ec2:DescribeVpcs"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor10",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:CreateNetworkInterfacePermission"
+            ],
+            "Resource": "arn:aws:ec2:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:network-interface/*",
+            "Condition": {
+                "StringEquals": {
+                    "ec2:Subnet": [
+                        "arn:aws:ec2:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:subnet/*"
+                    ],
+                    "ec2:AuthorizedService": "codebuild.amazonaws.com"
+                }
+            }
         }
     ]
 })
