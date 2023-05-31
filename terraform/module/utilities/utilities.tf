@@ -199,10 +199,12 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Effect": "Allow",
             "Action": [
                 "ec2:DescribeSubnets",
-                "ec2:DescribeVpcs",
                 "ec2:DescribeNetworkInterfaces",
                 "ec2:DeleteNetworkInterface",
-                "ec2:DescribeSecurityGroups"
+                "ec2:DescribeSecurityGroups",
+                "ec2:CreateNetworkInterface",
+                "ec2:DescribeDhcpOptions",
+                "ec2:DescribeVpcs"
             ],
             "Resource": "*"
         }
