@@ -436,7 +436,7 @@ resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
         target_group {
           name = var.tg1
         }
-        target_group {}
+        target_group {
           name = var.tg2
         }
       }
