@@ -245,7 +245,7 @@ variable "domain_name_used" {
 }
 */
 
-
+/*
 ######### Code Build, Code Deploy and Pipeline Module
 ## Target Group names
 variable "tg1" {
@@ -278,3 +278,4 @@ variable "test_listner_arn" {
 variable "region" {
     type = string  
 }
+*/
