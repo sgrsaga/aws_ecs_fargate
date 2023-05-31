@@ -218,7 +218,9 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Condition": {
                 "StringEquals": {
                     "ec2:Subnet": [
-                        "arn:aws:ec2:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:subnet/*"
+                        "arn:aws:ec2:ap-south-1:598792377165:subnet/subnet-07205809c8422aa37",
+                        "arn:aws:ec2:ap-south-1:598792377165:subnet/subnet-085ced37e0a7966f6",
+                        "arn:aws:ec2:ap-south-1:598792377165:subnet/subnet-01dc81d353d8a35b2"
                     ],
                     "ec2:AuthorizedService": "codebuild.amazonaws.com"
                 }
