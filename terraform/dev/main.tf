@@ -79,13 +79,20 @@ module "aurora_pg_database" {
  }
 */
 
-## Utilities Module
-module "utilities_resources" {
-  source = "../module/utilities"
+## ECS  Module
+module "ecs_resources" {
+  source = "../module/ecs-code"
   vpc_id = module.main_network.vpc_id
   ## ALB Access logs S3 bucket
   alb_access_log_s3_bucket = var.alb_access_log_s3_bucket
   depends_on = [ module.main_network ]
+}
+
+## Code Build and Pipeline
+module "build_pipeline" {
+  source = "../module/codebuild-pipeline"
+  vpc_id = module.main_network.vpc_id
+  depends_on = [ module.ecs_resources ]
 }
 
 /*
