@@ -354,7 +354,7 @@ EOF
 }
 
 ## Creating policy for CodeBuildRoleForECS
-resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
+resource "aws_iam_role_policy" "CodeDeploymentGroupRoleForECS_policy" {
   name = aws_iam_role.CodeDeploymentGroupRoleForECS.name
   role = aws_iam_role.CodeDeploymentGroupRoleForECS.id
 
