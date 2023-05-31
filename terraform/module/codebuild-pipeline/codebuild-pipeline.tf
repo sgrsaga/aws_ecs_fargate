@@ -441,7 +441,7 @@ resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
         }
       }
 }
-
+}
 
 /*
 resource "aws_cloudwatch_event_rule" "commit" {
