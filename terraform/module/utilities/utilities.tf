@@ -201,6 +201,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "ec2:DescribeSubnets",
                 "ec2:DescribeVpcs",
                 "ec2:DescribeNetworkInterfaces",
+                "ec2:DeleteNetworkInterface",
                 "ec2:DescribeSecurityGroups"
             ],
             "Resource": "*"
