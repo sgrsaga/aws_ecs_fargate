@@ -689,7 +689,7 @@ resource "aws_codepipeline" "codepipeline" {
   name     = "${local.code_pipeline_name}"
   # Hard code role
   role_arn =  aws_iam_role.CodePipelineRoleForECS.arn
-
+  depends_on = [ aws_codedeploy_deployment_group.CodeDeploymentGroupForECS ]
   artifact_store {
     location = aws_s3_bucket.code_artifact.bucket
     type     = "S3"
@@ -751,5 +751,4 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
-  depends_on = [ aws_codedeploy_deployment_group.aws_codedeploy_deployment_group ]
 }
