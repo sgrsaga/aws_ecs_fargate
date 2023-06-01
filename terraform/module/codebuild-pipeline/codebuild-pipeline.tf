@@ -416,7 +416,7 @@ resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
       }
       deployment_ready_option {
         action_on_timeout = "STOP_DEPLOYMENT"
-        wait_time_in_minutes = 25
+        wait_time_in_minutes = 5
       }
     }
     ecs_service {
