@@ -11,7 +11,7 @@ locals {
   log_group = "codebuild_log_group"
   repo_name = "blue_green_repo_sgr"
   codebuild_project = "ECS_Build"
-  artifact_s3_bucket = "code-artifact-sgr-20230530" 
+  artifact_s3_bucket = "code-artifact-sgr-20230531" 
   cloudwatch_logs = "CodeBuildLG"
   deploy_app = "ECS_Blue_Green_App"
   deployment_group = "ECS_Blue_Green_App_DG"
