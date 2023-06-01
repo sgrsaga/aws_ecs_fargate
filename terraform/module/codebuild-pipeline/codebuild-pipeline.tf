@@ -406,7 +406,7 @@ resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
     app_name = aws_codedeploy_app.ecodedeploy_app.name
     deployment_group_name = "${local.deployment_group}"
     service_role_arn = aws_iam_role.CodeDeploymentGroupRoleForECS.arn
-
+    deployment_config_name = "CodeDeployDefault.ECSLinear10PercentEvery1Minutes"
     deployment_style {
       deployment_type = "BLUE_GREEN"
       deployment_option = "WITH_TRAFFIC_CONTROL"
@@ -721,8 +721,8 @@ resource "aws_codepipeline" "codepipeline" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      input_artifacts  = ["SourceArtifact"]
+      output_artifacts = ["BuildArtifact"]
       version          = "1"
       region = var.region
       configuration = {
@@ -739,14 +739,14 @@ resource "aws_codepipeline" "codepipeline" {
       owner           = "AWS"
       provider        = "CodeDeployToECS"
       version         = "1"
-      input_artifacts = ["source_output"]
+      input_artifacts = ["SourceArtifact"]
 
       configuration = {
         ApplicationName                = "${local.deploy_app}"
         DeploymentGroupName            = "${local.deployment_group}"
-        AppSpecTemplateArtifact        = "source_output"
+        AppSpecTemplateArtifact        = "SourceArtifact"
         AppSpecTemplatePath            = "appspec.yaml"
-        TaskDefinitionTemplateArtifact = "source_output"
+        TaskDefinitionTemplateArtifact = "SourceArtifact"
         TaskDefinitionTemplatePath     = "taskdef.json"
       }
     }
