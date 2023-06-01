@@ -53,9 +53,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
         {
             "Sid": "VisualEditor0",
             "Effect": "Allow",
-            "Resource": [
-                "arn:aws:s3:::codepipeline-ap-south-1-*"
-            ],
+            "Resource": "*",
             "Action": [
                 "s3:PutObject",
                 "s3:GetObject",
