@@ -751,4 +751,5 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+  depends_on = [ aws_codedeploy_deployment_group.aws_codedeploy_deployment_group.CodeDeploymentGroupForECS ]
 }
