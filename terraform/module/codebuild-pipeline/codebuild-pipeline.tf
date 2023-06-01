@@ -715,7 +715,7 @@ resource "aws_codepipeline" "codepipeline" {
   }
 }
 
-
+/*
 ## Trigger Code Pipeline with CloudWatch event
 resource "aws_cloudwatch_event_rule" "code_commit_event_rule" {
   name        = "blue_green_repocapture-commit-event"
@@ -751,3 +751,4 @@ resource "aws_cloudwatch_event_target" "event_target" {
   arn       = aws_codepipeline.codepipeline.arn
   role_arn  = aws_iam_role.CodePipelineRoleForECS.arn
 }
+*/
