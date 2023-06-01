@@ -227,13 +227,6 @@ resource "aws_lb_listener" "alb_to_tg1" {
   default_action {
     target_group_arn = aws_lb_target_group.ecs_alb_tg1.id
     type = "forward"
-    /*
-    redirect {
-      port = 443
-      protocol = "HTTPS"
-      status_code = "HTTP_301"
-    }
-    */
   }
   lifecycle {
     ignore_changes = [ default_action ]
@@ -248,13 +241,6 @@ resource "aws_lb_listener" "alb_to_tg2" {
   default_action {
     target_group_arn = aws_lb_target_group.ecs_alb_tg2.id
     type = "forward"
-    /*
-    redirect {
-      port = 443
-      protocol = "HTTPS"
-      status_code = "HTTP_301"
-    }
-    */
   }
   lifecycle {
     ignore_changes = [ default_action ]
@@ -320,20 +306,11 @@ resource "aws_ecs_service" "service_node_app" {
   lifecycle {
     ignore_changes = [desired_count]
   }
-  
-  ## Remove the loadbalancer from ECS service and assign from CodeDeploy
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_alb_tg1.arn
     container_name   = "AppTask"
     container_port   = 80
   }
-  /*
-  load_balancer {
-    target_group_arn = aws_lb_target_group.ecs_alb_tg2.arn
-    container_name   = "AppTask"
-    container_port   = 80
-  }
-  */
   deployment_controller {
     type = "CODE_DEPLOY"
   }

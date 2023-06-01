@@ -141,7 +141,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Sid": "VisualEditor4",
             "Effect": "Allow",
             "Resource": [
-                "arn:aws:codecommit:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:${local.repo_name}"
+                "arn:aws:codecommit:${var.region}:${data.aws_caller_identity.caller_identity.account_id}:${local.repo_name}"
             ],
             "Action": [
                 "codecommit:GitPull"
@@ -171,7 +171,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "codebuild:BatchPutCodeCoverages"
             ],
             "Resource": [
-                "arn:aws:codebuild:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:build/${local.codebuild_project}-*"
+                "arn:aws:codebuild:${var.region}:${data.aws_caller_identity.caller_identity.account_id}:build/${local.codebuild_project}-*"
             ]
         },
         {
@@ -220,11 +220,11 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
             "Action": [
                 "ec2:CreateNetworkInterfacePermission"
             ],
-            "Resource": "arn:aws:ec2:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:network-interface/*",
+            "Resource": "arn:aws:ec2:${var.region}:${data.aws_caller_identity.caller_identity.account_id}:network-interface/*",
             "Condition": {
                 "StringLike": {
                     "ec2:Subnet": [
-                        "arn:aws:ec2:ap-south-1:${data.aws_caller_identity.caller_identity.account_id}:subnet/subnet-*"
+                        "arn:aws:ec2:${var.region}:${data.aws_caller_identity.caller_identity.account_id}:subnet/subnet-*"
                     ],
                     "ec2:AuthorizedService": "codebuild.amazonaws.com"
                 }
@@ -715,40 +715,3 @@ resource "aws_codepipeline" "codepipeline" {
   }
 }
 
-/*
-## Trigger Code Pipeline with CloudWatch event
-resource "aws_cloudwatch_event_rule" "code_commit_event_rule" {
-  name        = "blue_green_repocapture-commit-event"
-  description = "Capture blue_green_repo repo commit"
-
-  event_pattern = <<EOF
-{
-  "source": [
-    "aws.codecommit"
-  ],
-  "detail-type": [
-    "CodeCommit Repository State Change"
-  ],
-  "resources": [
-   "${aws_codecommit_repository.repo.arn}"
-  ],
-  "detail": {
-    "referenceType": [
-      "branch"
-    ],
-    "referenceName": [
-      "master"
-    ]
-  }
-}
-EOF
-}
-
-# Push the Event to Code Pipeline target
-resource "aws_cloudwatch_event_target" "event_target" {
-  target_id = "1"
-  rule      = aws_cloudwatch_event_rule.code_commit_event_rule.name
-  arn       = aws_codepipeline.codepipeline.arn
-  role_arn  = aws_iam_role.CodePipelineRoleForECS.arn
-}
-*/
