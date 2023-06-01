@@ -670,7 +670,7 @@ resource "aws_codepipeline" "codepipeline" {
         RepositoryName        = aws_codecommit_repository.repo.repository_name
         BranchName            = "master"
         PollForSourceChanges  = false
-        output_artifacts = "CODE_ZIP"
+        OutputArtifactFormat = "CODE_ZIP"
       }
       region = var.region
     }
