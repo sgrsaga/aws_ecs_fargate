@@ -92,7 +92,7 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "logs:PutRetentionPolicy",
                 "logs:GetLogGroupFields"
             ],
-            "Resource": "arn:aws:logs:*:598792377165:log-group:*"
+            "Resource": "arn:aws:logs:*:${data.aws_caller_identity.caller_identity.account_id}:log-group:*"
         },
         {
             "Sid": "VisualEditor2",
@@ -108,8 +108,8 @@ resource "aws_iam_role_policy" "CodeBuildRoleForECS_policy" {
                 "logs:ListTagsForResource"
             ],
             "Resource": [
-                "arn:aws:logs:*:598792377165:log-group:*:log-stream:*",
-                "arn:aws:logs:*:598792377165:destination:*"
+                "arn:aws:logs:*:${data.aws_caller_identity.caller_identity.account_id}:log-group:*:log-stream:*",
+                "arn:aws:logs:*:${data.aws_caller_identity.caller_identity.account_id}:destination:*"
             ]
         },
         {
