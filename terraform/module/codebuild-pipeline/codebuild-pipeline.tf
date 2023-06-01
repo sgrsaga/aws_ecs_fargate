@@ -412,7 +412,7 @@ resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
     blue_green_deployment_config {
       terminate_blue_instances_on_deployment_success {
         action = "TERMINATE"
-        termination_wait_time_in_minutes = 20
+        termination_wait_time_in_minutes = 10
       }
       deployment_ready_option {
         action_on_timeout = "STOP_DEPLOYMENT"
@@ -440,44 +440,6 @@ resource "aws_codedeploy_deployment_group" "CodeDeploymentGroupForECS" {
       }
 }
 }
-
-/*
-resource "aws_cloudwatch_event_rule" "commit" {
-  name        = "blue_green_repocapture-commit-event"
-  description = "Capture blue_green_repo repo commit"
-
-  event_pattern = <<EOF
-{
-  "source": [
-    "aws.codecommit"
-  ],
-  "detail-type": [
-    "CodeCommit Repository State Change"
-  ],
-  "resources": [
-   "${data.aws_codecommit_repository.repo.arn}"
-  ],
-  "detail": {
-    "referenceType": [
-      "branch"
-    ],
-    "referenceName": [
-      "master"
-    ]
-  }
-}
-EOF
-}
-*/
-
-/*
-resource "aws_cloudwatch_event_target" "event_target" {
-  target_id = "1"
-  rule      = aws_cloudwatch_event_rule.commit.name
-  arn       = aws_codepipeline.codepipeline.arn
-  role_arn  = aws_iam_role.codepipeline_role.arn
-}
-*/
 
 ## Code Pipeline Role
 resource "aws_iam_role" "CodePipelineRoleForECS" {
@@ -749,4 +711,41 @@ resource "aws_codepipeline" "codepipeline" {
       }
     }
   }
+}
+
+
+## Trigger Code Pipeline with CloudWatch event
+resource "aws_cloudwatch_event_rule" "code_commit_event_rule" {
+  name        = "blue_green_repocapture-commit-event"
+  description = "Capture blue_green_repo repo commit"
+
+  event_pattern = <<EOF
+{
+  "source": [
+    "aws.codecommit"
+  ],
+  "detail-type": [
+    "CodeCommit Repository State Change"
+  ],
+  "resources": [
+   "${aws_codecommit_repository.repo.arn}"
+  ],
+  "detail": {
+    "referenceType": [
+      "branch"
+    ],
+    "referenceName": [
+      "master"
+    ]
+  }
+}
+EOF
+}
+
+# Push the Event to Code Pipeline target
+resource "aws_cloudwatch_event_target" "event_target" {
+  target_id = "1"
+  rule      = aws_cloudwatch_event_rule.code_commit_event_rule.name
+  arn       = aws_codepipeline.codepipeline.arn
+  role_arn  = aws_iam_role.CodePipelineRoleForECS.arn
 }
