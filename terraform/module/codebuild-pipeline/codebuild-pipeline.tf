@@ -9,7 +9,7 @@ data "aws_caller_identity" "caller_identity" {}
 # Define Few Local variables
 locals {
   log_group = "codebuild_log_group"
-  repo_name = "blue_green_repo"
+  repo_name = "blue_green_repo_sgr"
   codebuild_project = "ECS_Build"
   artifact_s3_bucket = "code-artifact-sgr-20230530" 
   cloudwatch_logs = "CodeBuildLG"
