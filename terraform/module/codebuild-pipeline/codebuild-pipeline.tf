@@ -287,7 +287,7 @@ resource "aws_codebuild_project" "codebuild" {
   artifacts {
     type = "S3"
     location = aws_s3_bucket.code_artifact.bucket
-    override_artifact_name = true
+    override_artifact_name = false
   }
 
   environment {
