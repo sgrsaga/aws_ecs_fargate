@@ -664,11 +664,13 @@ resource "aws_codepipeline" "codepipeline" {
       provider         = "CodeCommit"
       version          = "1"
       output_artifacts = ["SourceArtifact"]
+      namespace = "SourceVariables"
 
       configuration = {
         RepositoryName        = aws_codecommit_repository.repo.repository_name
         BranchName            = "master"
         PollForSourceChanges  = false
+        output_artifacts = "CODE_ZIP"
       }
       region = var.region
     }
