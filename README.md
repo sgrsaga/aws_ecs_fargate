@@ -1,4 +1,4 @@
-# OpsTools-DryRun - Test on Sandbox
+# Python Django workload hosting AWS ECS Fargate infrastructure with Blue Green Deployment stratergy
 What we do:
 We are planning to use this branch just to check the Infrastructure creation tesing in PPE nevironment.
 
