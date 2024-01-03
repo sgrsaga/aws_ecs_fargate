@@ -25,10 +25,10 @@ In this project we discuss how we can implement a complete AWS ECS Frgate enviro
 - Route 53 and AWS Certificat eManager
 - CloudWatch and SNS for Obervability and notifications
 
-![High Level architecture](images/ECS-Fargate.png)
+![High Level architecture](Images/ECS-Fargate.png)
 
 ## GitHub Action pipeline
-![GitLab pipeline](images/GitLab-CodePipeline.png)
+![GitLab pipeline](Images/GitLab-CodePipeline.png)
 
 ## Hi, I'm Sagara! 👋
 
