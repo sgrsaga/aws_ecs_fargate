@@ -13,6 +13,7 @@ In this project we discuss how we can implement a complete AWS ECS Frgate enviro
 ### Prerequisites
 ##### 1. Active domain in Route53
 ##### 2. GitLab OIDC configuration between GitLab project and AWS 
+
 ## Infrastructure Resources and Highlevel connectivity
 
 - AWS Network (VPC, Internet Gateway, Subnets, Route Tables, Nat Gateway, Security Groups)
@@ -24,11 +25,11 @@ In this project we discuss how we can implement a complete AWS ECS Frgate enviro
 - Route 53 and AWS Certificat eManager
 - CloudWatch and SNS for Obervability and notifications
 
-![High Level architecture](images/AWS-ECS-Fargate.png)
+![High Level architecture](images/ECS-Fargate.png)
 
 ## GitHub Action pipeline
+![GitLab pipeline](images/GitLab-CodePipeline.png)
 
-![GitHub Actions based pipeline](images/GitLab and CodePipeline.png)
 ## Hi, I'm Sagara! 👋
 
 
