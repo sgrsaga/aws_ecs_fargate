@@ -3,14 +3,14 @@
 
 ###### VPC parameters
 # 1. Create a VPC
-vpc_name = "OpsTools-VPC-dev"
+vpc_name = "Dev-VPC"
 vpc_cidr = "10.0.0.0/16"
 public_source_cidr = ["0.0.0.0/0"]
 public_source_cidr_v6 = ["::/0"]
 #azs = ["ap-south-1a","ap-south-1b","ap-south-1c"]
 
 # 2. Create a Internet Gateway
-ig_name = "OpsTools_IG"
+ig_name = "Dev_IG"
 
 # 1.3. Create 2 Route tables
 public_rt = "PUBLIC_RT"
