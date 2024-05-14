@@ -77,7 +77,7 @@ module "aurora_pg_database" {
 
   depends_on = [module.main_network] 
  }
-*/
+
 
 ## ECS  Module
 module "ecs_resources" {
@@ -101,7 +101,7 @@ module "build_pipeline" {
   region = var.region
   depends_on = [ module.ecs_resources ]
 }
-
+*/
 /*
 ## Direct ECS Blue Green
 module "ecs-service-blue-green-deployment" {
@@ -155,7 +155,7 @@ module "route53" {
   ]
 }
 
-/*
+
 ## 5. Create monitoring
 module "monitor_and_alarm" {
   source = "./module/monitor"
