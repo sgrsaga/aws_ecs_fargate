@@ -32,9 +32,8 @@ provider "aws" {
   region = "ap-south-1"
   default_tags {
    tags = {
-     t_environment  = "dev"
-     t_AppID = "SVC02193"
-     t_dcl = "3"
+     env  = "dev"
+     app = "dev_app"
    }
  }
 }
